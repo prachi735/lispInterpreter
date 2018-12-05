@@ -9,23 +9,28 @@ function interpret () {
     if (err) throw err
     let expressions = fileData.split('\n')
     for (let expression of expressions) {
+      console.log(expression)
       let res = read(expression)
       res = evaluate(res, env)
-      // console.log(res)
+      console.log(res)
     }
   }
   )
 }
 
 function evaluate (input, env) {
-  console.log(input)
+  if (operations[input[0]]) {
+    if (input[0] === `if`) {
+      return evaluate(input[1], env) ? evaluate(input[2], env) : evaluate(input[3], env)
+    }
+    return operations[input[0]](input.splice(1))
+  } else return input
 }
 
 function read (input) {
-  console.log(input)
   // converting s-expression to js nested array
   input = input.replace(/\(/g, '[').replace(/\)/g, ']')
-  input = input.replace(/([a-zA-Z0-9<>-]+)/g, `\"$1\",`)
+  input = input.replace(/([*+a-zA-Z0-9<>-]+)/g, `\"$1\",`)
   input = input.replace(/,]/g, '] ,').replace(/ /g, '').slice(0, -1)
   input = input.replace(/,]/g, '] ,').replace(/ /g, '').slice(0, -1)
   return parseArray(input)[0]
@@ -36,22 +41,22 @@ let env = {}
 
 // operations
 let operations = {}
-operations[`+`] = (...a) => a.reduce((a, c) => a + c)
-operations[`-`] = (...a) => a.reduce((a, c) => a - c)
-operations[`*`] = (...a) => a.reduce((a, c) => a * c)
-operations[`/`] = (...a) => a.reduce((a, c) => a / c)
-operations[`%`] = (...a) => a.reduce((a, c) => a % c)
-operations[`<`] = (...a) => a.reduce((a, c) => a < c)
-operations[`>`] = (...a) => a.reduce((a, c) => a > c)
-operations[`<=`] = (...a) => a.reduce((a, c) => a <= c)
-operations[`>=`] = (...a) => a.reduce((a, c) => a >= c)
-operations[`=`] = (...a) => a.reduce((a, c) => a === c)
-operations[`and`] = (...a) => a.reduce((a, b) => a && b)
-operations[`or`] = (...a) => a.reduce((a, b) => a || b)
-operations[`not`] = (...a) => a.map((a) => ~a)
-operations[`if`] = (...a) => (a[0] ? a[1] : a[2])
+operations[`+`] = (a) => a.reduce((a, c) => a + c)
+operations[`-`] = (a) => a.reduce((a, c) => a - c)
+operations[`*`] = (a) => a.reduce((a, c) => a * c)
+operations[`/`] = (a) => a.reduce((a, c) => a / c)
+operations[`%`] = (a) => a.reduce((a, c) => a % c)
+operations[`<`] = (a) => a.reduce((a, c) => a < c)
+operations[`>`] = (a) => a.reduce((a, c) => a > c)
+operations[`<=`] = (a) => a.reduce((a, c) => a <= c)
+operations[`>=`] = (a) => a.reduce((a, c) => a >= c)
+operations[`=`] = (a) => a.reduce((a, c) => a === c)
+operations[`and`] = (a) => a.reduce((a, b) => a && b)
+operations[`or`] = (a) => a.reduce((a, b) => a || b)
+operations[`not`] = (a) => a.map((a) => ~a)
+operations[`if`] = (a) => (a[0] ? a[1] : a[2])
 
-// Conver to Array
+// prase an Array
 function parseArray (input) {
   if (!input.startsWith('[')) return null
   let arr = []
